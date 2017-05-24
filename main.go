@@ -2,8 +2,11 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"strings"
+
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -18,7 +21,7 @@ func main() {
 	validateOpts(options)
 
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region:      aws.String("eu-central-1"),
+		Region:      aws.String(options.Region),
 		Credentials: credentials.NewStaticCredentials(options.KeyID, options.KeySecret, options.token),
 	}))
 
@@ -54,10 +57,11 @@ type Options struct {
 }
 
 func parseOpts() Options {
-	idPtr := flag.String("key_id", "", "Your AWS Access Key ID")
-	secretPtr := flag.String("key_secret", "", "Your AWS Access Key Secret")
-	bucketPtr := flag.String("bucket", "", "The bucket to download from")
-	regionPtr := flag.String("region", "", "The region your bucket is in")
+	idPtr := flag.String("key_id", "", "AWS Access Key ID")
+	secretPtr := flag.String("key_secret", "", "AWS Access Key Secret")
+	bucketPtr := flag.String("bucket", "", "Bucket to download from")
+	regionPtr := flag.String("region", "", "Region the bucket is in")
+
 	flag.Parse()
 
 	return Options{
@@ -81,6 +85,8 @@ func validateOpts(opts Options) {
 	}
 
 	if !isValidOpts(opts) {
-		panic("Invalid arguments. Try --help for information on how to use this tool")
+		fmt.Print("\nInvalid argument(s). \n\n")
+		flag.Usage()
+		os.Exit(1)
 	}
 }
